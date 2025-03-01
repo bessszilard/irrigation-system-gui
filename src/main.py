@@ -12,6 +12,10 @@ from MQTTClient import MQTTClient
 class MQTTApp(App):
     connection_status = StringProperty("Not connected")
     local_time = StringProperty("Waiting for time...")
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.mqtt_client = MQTTClient(self.on_connect)
 
     def build(self):
         layout = GridLayout(cols=2, padding=10, spacing=10)
@@ -34,10 +38,21 @@ class MQTTApp(App):
         self.local_time_label = Label(text=self.local_time, font_size=20)
         layout.add_widget(self.local_time_label)
 
+        self.connect_to_broker("")
+
         return layout
     
-    def update_local_time(self, new_time):
+    def update_local_time_hd(self, new_time):
         self.local_time_label.text = f"{new_time}"
+
+    def cmd_option_hd(self, payload):
+        print(payload)
+
+    def cmd_option_sensors(self, payload):
+        print(payload)
+
+    def sensors_hd(self, payload):
+        print(payload)
 
     def connect_to_broker(self, instance):
         broker = self.broker_input.text
@@ -46,10 +61,17 @@ class MQTTApp(App):
         except ValueError:
             self.update_status("Invalid port number", "red")
             return
-
-        self.mqtt_client = MQTTClient(self.on_connect, self.update_local_time)
+        
         if not self.mqtt_client.connect(broker, port):
             self.update_status("Connection failed", "red")
+            return
+
+        self.mqttTopicCallbacks = {}
+        self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["LOCAL_TIME"]] = self.update_local_time_hd
+        self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["CMD_OPTIONS"]] = self.cmd_option_hd
+        self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["SENSORS"]] = self.sensors_hd
+
+        self.mqtt_client.setTopicsCallback(self.mqttTopicCallbacks)
 
     @mainthread
     def update_status(self, status, color):

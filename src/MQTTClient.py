@@ -2,19 +2,25 @@ import paho.mqtt.client as mqtt
 import json
 
 # Define MQTT topics
-MQTT_SENSORS = "sjirs/sensors"
-MQTT_RELAYS = "sjirs/relays"
-MQTT_LOCAL_TIME = "sjirs/localTime"
-MQTT_CMD_LIST = "sjirs/cmd/list"
-MQTT_CMD_RESPONSE = "sjirs/cmd/response"
 
+MQTT_TOPICS_JSON_PATH = "../config/MqttTopics.json"
 class MQTTClient:
-    def __init__(self, on_connect_callback, on_update_local_time):
+    def __init__(self, on_connect_callback):
         self.client = mqtt.Client()
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.on_connect_callback = on_connect_callback
-        self.on_update_local_time = on_update_local_time
+        self.subscribed_topics = set()
+        with open(MQTT_TOPICS_JSON_PATH) as f:
+            data = json.load(f)
+            self.SUB_TOPICS = data["Subscribe"]
+            self.PUB_TOPICS = data["Publish"]
+
+    def setTopicsCallback(self, callback):
+        self.__callbacks = callback
+
+    def requestForAllInfo(self):
+        self.client.publish(self.PUB_TOPICS["GET_CMD_OPTIONS"], "")
 
     def connect(self, broker, port):
         try:
@@ -24,56 +30,35 @@ class MQTTClient:
         except Exception as e:
             print(f"Connection failed: {e}")
             return False
+        
+    def subscribe(self, topic):
+        if topic in self.subscribed_topics:
+            return
+        self.subscribed_topics.add(topic)
+        self.client.subscribe(topic)
+        print(f"Subscribed to {topic}")
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print("Connected successfully to MQTT broker")
-            self.on_connect_callback(client, userdata, flags, rc)
+            for topic in self.SUB_TOPICS.values():
+                self.subscribe(topic)
             
-            # Subscribe to topics
-            self.client.subscribe(MQTT_SENSORS)
-            self.client.subscribe(MQTT_RELAYS)
-            self.client.subscribe(MQTT_LOCAL_TIME)
-            self.client.subscribe(MQTT_CMD_LIST)
-            self.client.subscribe(MQTT_CMD_RESPONSE)
+            self.on_connect_callback(client, userdata, flags, rc)
+
+            self.requestForAllInfo()
         else:
             print(f"Connection failed with code {rc}")
 
     def on_message(self, client, userdata, msg):
         topic = msg.topic
         payload = msg.payload.decode('utf-8')
+
+        if topic not in self.__callbacks.keys():
+            print(f"Topic {topic} not handled")
+            return
         
-        if topic == MQTT_SENSORS:
-            self.handle_sensors(payload)
-        elif topic == MQTT_RELAYS:
-            self.handle_relays(payload)
-        elif topic == MQTT_LOCAL_TIME:
-            self.handle_local_time(payload)
-        elif topic == MQTT_CMD_LIST:
-            self.handle_cmd_list(payload)
-        elif topic == MQTT_CMD_RESPONSE:
-            self.handle_cmd_response(payload)
-        else:
-            print(f"Received message on unknown topic {topic}: {payload}")
-
-    def handle_sensors(self, payload):
-        print(f"Sensor Data Received: {payload}")
-        # Process sensor data here
-    
-    def handle_relays(self, payload):
-        print(f"Relay Status Received: {payload}")
-        # Process relay status here
-    
-    def handle_local_time(self, payload):
-        print(f"Local Time Received: {payload}")
-        data = json.loads(payload)
-        self.on_update_local_time(data["LocalTime"])
-    
-    def handle_cmd_list(self, payload):
-        print(f"Command List Received: {payload}")
-        # Process command list here
-    
-    def handle_cmd_response(self, payload):
-        print(f"Command Response Received: {payload}")
-
-        # Process command response here
+        parsedPayload = json.loads(payload)
+        if not parsedPayload:
+            print(f"Failed to parse {payload}")
+        self.__callbacks[topic](parsedPayload)
