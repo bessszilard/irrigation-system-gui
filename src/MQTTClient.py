@@ -58,7 +58,15 @@ class MQTTClient:
             print(f"Topic {topic} not handled")
             return
         
-        parsedPayload = json.loads(payload)
-        if not parsedPayload:
+        try:
+            parsedPayload = json.loads(payload)
+            if not parsedPayload:
+                print(f"Failed to parse {payload}")
+            self.__callbacks[topic](parsedPayload)
+        except Exception as e:
             print(f"Failed to parse {payload}")
-        self.__callbacks[topic](parsedPayload)
+
+# publish
+    def addCommand(self, command):
+        self.client.publish(self.PUB_TOPICS["ADD_CMD"], command)
+        print(f'{self.PUB_TOPICS["ADD_CMD"]} published {command}')

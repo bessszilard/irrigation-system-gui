@@ -8,6 +8,8 @@ from kivy.clock import mainthread
 from kivy.clock import Clock
 from MQTTClient import MQTTClient
 
+from CommandsWdiget import CommandWidget
+
 
 class MQTTApp(App):
     connection_status = StringProperty("Not connected")
@@ -38,6 +40,11 @@ class MQTTApp(App):
         self.local_time_label = Label(text=self.local_time, font_size=20)
         layout.add_widget(self.local_time_label)
 
+        layout.add_widget(Label())  # Empty label to move to next row
+
+        self.commandWidget = CommandWidget(self.mqtt_client.addCommand)
+        layout.add_widget(self.commandWidget)
+
         self.connect_to_broker("")
 
         return layout
@@ -46,6 +53,8 @@ class MQTTApp(App):
         self.local_time_label.text = f"{new_time}"
 
     def cmd_option_hd(self, payload):
+        # self.commandWidget.rebuild(payload)
+        Clock.schedule_once(lambda dt: self.commandWidget.rebuild(payload))
         print(payload)
 
     def cmd_option_sensors(self, payload):
