@@ -10,6 +10,7 @@
     "Publish": {
         "ADD_CMD": "sjirs/cmd/add",
         "REMOVE_CMD": "sjirs/cmd/remove",
-        "GET_CMD_OPTIONS": "sjirs/cmd/command-options/get"
+        "GET_CMD_OPTIONS": "sjirs/cmd/command-options/get",
+        "GET_ALL_INFO": "sjirs/get-all-info"
     }
 }

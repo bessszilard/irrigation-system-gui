@@ -9,7 +9,8 @@ from kivy.clock import Clock
 from MQTTClient import MQTTClient
 
 from CommandsWdiget import CommandWidget
-
+from RelayStatesWidget import RelayStatesWidget
+from kivy.uix.boxlayout import BoxLayout
 
 class MQTTApp(App):
     connection_status = StringProperty("Not connected")
@@ -20,34 +21,44 @@ class MQTTApp(App):
         self.mqtt_client = MQTTClient(self.on_connect)
 
     def build(self):
-        layout = GridLayout(cols=2, padding=10, spacing=10)
+        main_layout = BoxLayout(orientation="vertical", padding=5, spacing=5)
 
-        layout.add_widget(Label(text="MQTT Server:"))
+        # Grid layout for MQTT settings (2 columns, 3 rows)
+        mqtt_layout = GridLayout(cols=2, spacing=5, size_hint_x=0.5)
+
+        mqtt_layout.add_widget(Label(text="MQTT Server:", size_hint_y=None, height=30))
         self.broker_input = TextInput(text="broker.emqx.io")
-        layout.add_widget(self.broker_input)
+        mqtt_layout.add_widget(self.broker_input)
 
-        layout.add_widget(Label(text="Port:"))
+        mqtt_layout.add_widget(Label(text="Port:", size_hint_y=None, height=30))
         self.port_input = TextInput(text="1883")
-        layout.add_widget(self.port_input)
+        mqtt_layout.add_widget(self.port_input)
 
-        self.status_label = Label(text=self.connection_status)
-        layout.add_widget(self.status_label)
+        mqtt_layout.add_widget(Label(text="Status:", size_hint_y=None, height=30))
+        self.status_label = Label(text=self.connection_status, size_hint_y=None, height=30)
+        mqtt_layout.add_widget(self.status_label)
 
+        # Connect button
         self.connect_button = Button(text="Connect")
         self.connect_button.bind(on_press=self.connect_to_broker)
-        layout.add_widget(self.connect_button)
+        mqtt_layout.add_widget(self.connect_button)
 
-        self.local_time_label = Label(text=self.local_time, font_size=20)
-        layout.add_widget(self.local_time_label)
+        # Local time label
+        self.local_time_label = Label(text=self.local_time, font_size=20, size_hint_y=None, height=30)
+        mqtt_layout.add_widget(self.local_time_label)
 
-        layout.add_widget(Label())  # Empty label to move to next row
+        main_layout.add_widget(mqtt_layout)
 
+        # Command Widget (spans full width)
         self.commandWidget = CommandWidget(self.mqtt_client.addCommand)
-        layout.add_widget(self.commandWidget)
+        main_layout.add_widget(self.commandWidget)
+
+        # Relay States Widget (spans full width)
+        self.relayStateWidget = RelayStatesWidget(self.toggle_hd)
+        main_layout.add_widget(self.relayStateWidget)
 
         self.connect_to_broker("")
-
-        return layout
+        return main_layout
     
     def update_local_time_hd(self, new_time):
         self.local_time_label.text = f"{new_time}"
@@ -55,13 +66,20 @@ class MQTTApp(App):
     def cmd_option_hd(self, payload):
         # self.commandWidget.rebuild(payload)
         Clock.schedule_once(lambda dt: self.commandWidget.rebuild(payload))
-        print(payload)
+        print("cmd_option_hd")
 
     def cmd_option_sensors(self, payload):
-        print(payload)
+        print("cmd_option_sensors")
 
     def sensors_hd(self, payload):
-        print(payload)
+        print("sensors_hd")
+        
+    def relay_state_hd(self, payload):
+        print("relay_state_hd")
+        Clock.schedule_once(lambda dt: self.relayStateWidget.build_or_update(payload))
+
+    def toggle_hd(self, relay):
+        print(f"Toggle {relay}")
 
     def connect_to_broker(self, instance):
         broker = self.broker_input.text
@@ -79,6 +97,7 @@ class MQTTApp(App):
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["LOCAL_TIME"]] = self.update_local_time_hd
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["CMD_OPTIONS"]] = self.cmd_option_hd
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["SENSORS"]] = self.sensors_hd
+        self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["RELAYS"]] = self.relay_state_hd
 
         self.mqtt_client.setTopicsCallback(self.mqttTopicCallbacks)
 

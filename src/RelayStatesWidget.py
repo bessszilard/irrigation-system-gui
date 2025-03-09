@@ -6,6 +6,7 @@ from kivy.graphics import Color, Rectangle
 from kivy.uix.button import Button
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.boxlayout import BoxLayout
+import json
 
 class ColoredLabel(Label):
     def __init__(self, text, state, **kwargs):
@@ -48,7 +49,7 @@ class AutoCheckbox(BoxLayout):
         self.callback(self.relay, value)
 
 
-class RelayGrid(GridLayout):
+class RelayStatesWidget(GridLayout):
     def __init__(self, toggle_handler=None , **kwargs):
         super().__init__(**kwargs)
         self.__label_map = {}
@@ -133,21 +134,27 @@ class RelayGrid(GridLayout):
 
 class RelayApp(App):
     def build(self):
-        relay_data = {
-            'R01': {'state': 'Opened', 'cmd': 'Manual;R01;Opened;P05;;', 'priority': 'P05'},
-            'R02': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R03': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R04': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R05': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R06': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R07': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R08': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R09': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-            'R10': {'state': 'Closed', 'cmd': 'Manual;RXX;Closed;P00;F', 'priority': 'P00'},
-        }
-        
+        relay_data = """{
+        "R01": { "state": "Opened", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00"},
+        "R02": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00"},
+        "R03": { "state": "Opened", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00"},
+        "R04": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00"},
+        "R05": { "state": "Opened", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R06": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R07": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R08": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R09": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R10": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R11": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R12": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R13": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R14": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R15": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" },
+        "R16": { "state": "Closed", "cmd": "Manua;RXX;Closed;P00;F", "priority": "P00" }}
+        """
         scroll_view = ScrollView(size_hint=(1, 1))  # Allow scrolling
-        grid = RelayGrid(size_hint_y=None)
+        grid = RelayStatesWidget(size_hint_y=None)
+        relay_data = json.loads(relay_data)
         grid.build_or_update(relay_data)
         scroll_view.add_widget(grid)
         grid.build_or_update(relay_data)

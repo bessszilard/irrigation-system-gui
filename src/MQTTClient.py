@@ -20,7 +20,7 @@ class MQTTClient:
         self.__callbacks = callback
 
     def requestForAllInfo(self):
-        self.client.publish(self.PUB_TOPICS["GET_CMD_OPTIONS"], "")
+        self.client.publish(self.PUB_TOPICS["GET_ALL_INFO"], "")
 
     def connect(self, broker, port):
         try:
@@ -61,11 +61,16 @@ class MQTTClient:
         try:
             parsedPayload = json.loads(payload)
             if not parsedPayload:
-                print(f"Failed to parse {payload}")
+                print(f"Pares payload is none")
             self.__callbacks[topic](parsedPayload)
+       
+        except json.JSONDecodeError as e:
+            # Catch JSON decoding errors specifically
+            print(f"JSONDecodeError: Failed to parse payload. Error: {e}")
+            print(f"Payload: {payload}")
         except Exception as e:
-            print(f"Failed to parse {payload}")
-
+            # General exception for any other errors
+            print(f"Failed to parse {payload}. Error: {e}")
 # publish
     def addCommand(self, command):
         self.client.publish(self.PUB_TOPICS["ADD_CMD"], command)
