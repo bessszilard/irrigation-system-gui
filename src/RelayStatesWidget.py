@@ -58,12 +58,22 @@ class RelayStatesWidget(GridLayout):
         self.__toggle_handler = toggle_handler
         self.__built_already = False
         self.__auto_handler = None
+        self.__is_relay_opened = {}
 
         
     def toggle(self, relay):
-        print(f"toggled {relay}")
+        if relay != "RXX":
+            state = self.__label_map[f"{relay}_state"].state
+        else:
+            state = self.__label_map[f"R01_state"].state # check the first relay
+        if state == "Closed":
+            state = "Opened"
+        else:
+            state = "Closed"
+
+        print(f"toggled {relay} to {state}")
         if self.__toggle_handler:
-            self.__toggle_handler(relay)
+            self.__toggle_handler(relay, state)
 
     def auto_mode_changed(self, relay, state):
         """Handles checkbox toggle: enables/disables the button and calls handler"""
@@ -121,6 +131,8 @@ class RelayStatesWidget(GridLayout):
 
                 self.__buttons[f"{relay}_toggle"] = Button(text="Toggle")
                 self.__buttons[f"{relay}_toggle"].bind(on_press=lambda instance, r=relay: self.toggle(r))
+                # self.__buttons[f"{relay}_toggle"].bind(on_press=partial(self.toggle, relay, attributes.get("state", "")))
+                
                 self.add_widget(self.__buttons[f"{relay}_toggle"])
 
                 auto_checkbox = AutoCheckbox(relay, self.auto_mode_changed)

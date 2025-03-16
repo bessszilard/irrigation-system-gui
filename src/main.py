@@ -71,6 +71,10 @@ class MQTTApp(App):
     def cmd_option_sensors(self, payload):
         print("cmd_option_sensors")
 
+    def cmd_list_hd(self, payload):
+        self.commandWidget.add_command_list(payload["cmdList"])
+        print(f"Command list {self.commandWidget.command_list}")
+
     def sensors_hd(self, payload):
         print("sensors_hd")
         
@@ -78,8 +82,13 @@ class MQTTApp(App):
         print("relay_state_hd")
         Clock.schedule_once(lambda dt: self.relayStateWidget.build_or_update(payload))
 
-    def toggle_hd(self, relay):
-        print(f"Toggle {relay}")
+    def toggle_hd(self, relay, state):
+        # remove old command if exists
+        priority = "PTX" if relay == "RXX" else "PTO"
+
+        current_command = f"Manua;{relay};{state};{priority};"
+        self.mqtt_client.overrideCommand(current_command)
+        print(f"Toggle {relay} {state}")
 
     def connect_to_broker(self, instance):
         broker = self.broker_input.text
@@ -98,6 +107,7 @@ class MQTTApp(App):
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["CMD_OPTIONS"]] = self.cmd_option_hd
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["SENSORS"]] = self.sensors_hd
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["RELAYS"]] = self.relay_state_hd
+        self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["CMD_LIST"]] = self.cmd_list_hd
 
         self.mqtt_client.setTopicsCallback(self.mqttTopicCallbacks)
 

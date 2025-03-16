@@ -10,6 +10,7 @@ class CommandWidget(BoxLayout):
     def __init__(self, send_command_cb=None, **kwargs):
         super().__init__(orientation='horizontal', **kwargs)
         self.send_command_cb = send_command_cb # default None
+        self.command_list = []
 
     def rebuild(self, command_data):
         if command_data == None:
@@ -49,7 +50,10 @@ class CommandWidget(BoxLayout):
 
         self.send_button.bind(on_press=self.send_command)
         self.add_widget(self.send_button)
-    
+
+    def add_command_list(self, cmd_list):
+        self.command_list = cmd_list
+
     def send_command(self, instance):
         selected_values = {key: spinner.text for key, spinner in self.spinners.items()}
         selected_values['description'] = self.text_input.text

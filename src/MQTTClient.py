@@ -75,3 +75,11 @@ class MQTTClient:
     def addCommand(self, command):
         self.client.publish(self.PUB_TOPICS["ADD_CMD"], command)
         print(f'{self.PUB_TOPICS["ADD_CMD"]} published {command}')
+    
+    def removeCommand(self, command):
+        self.client.publish(self.PUB_TOPICS["REMOVE_CMD"], command)
+        print(f'{self.PUB_TOPICS["REMOVE_CMD"]} published {command}')  
+
+    def overrideCommand(self, command):
+        self.client.publish(self.PUB_TOPICS["OVERRIDE_CMD"], command)
+        print(f'{self.PUB_TOPICS["OVERRIDE_CMD"]} published {command}')
