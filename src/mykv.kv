@@ -1,0 +1,89 @@
+MDNavigationLayout:
+
+    # Sidebar (Navigation Drawer)
+    MDNavigationDrawer:
+        id: nav_drawer
+        radius: (0, 16, 16, 0)
+
+        BoxLayout:
+            orientation: "vertical"
+            spacing: "8dp"
+            padding: "8dp"
+
+            MDLabel:
+                text: "Navigation"
+                font_style: "H6"
+                size_hint_y: None
+                height: self.texture_size[1]
+
+            # Sidebar Buttons
+            MDList:
+                OneLineIconListItem:
+                    text: "MQTT"
+                    on_release:
+                        app.root.ids.nav_drawer.set_state("close")
+                        app.switch_screen("mqtt")
+
+                    IconLeftWidget:
+                        icon: "wifi"
+
+                OneLineIconListItem:
+                    text: "Commands"
+                    on_release:
+                        app.root.ids.nav_drawer.set_state("close")
+                        app.switch_screen("commands")
+
+                    IconLeftWidget:
+                        icon: "code-braces"
+
+                OneLineIconListItem:
+                    text: "Relay States"
+                    on_release:
+                        app.root.ids.nav_drawer.set_state("close")
+                        app.switch_screen("relay")
+
+                    IconLeftWidget:
+                        icon: "power"
+
+    # Screen Manager (Main Content Area)
+    MDScreenManager:
+        id: screen_manager
+
+        MDScreen:
+            name: "mqtt"
+            MDBoxLayout:
+                orientation: "vertical"
+
+                MDTopAppBar:
+                    title: "MQTT Settings"
+                    left_action_items: [["menu", lambda x: nav_drawer.set_state("toggle")]]
+
+                MDLabel:
+                    text: "MQTT Settings"
+                    halign: "center"
+
+        MDScreen:
+            name: "commands"
+            MDBoxLayout:
+                orientation: "vertical"
+
+                MDTopAppBar:
+                    title: "Commands"
+                    left_action_items: [["menu", lambda x: nav_drawer.set_state("toggle")]]
+
+                MDLabel:
+                    text: "Commands"
+                    halign: "center"
+
+        MDScreen:
+            name: "relay"
+            MDBoxLayout:
+                orientation: "vertical"
+
+                MDTopAppBar:
+                    title: "Relay States"
+                    left_action_items: [["menu", lambda x: nav_drawer.set_state("toggle")]]
+
+                MDLabel:
+                    text: "Relay States"
+                    halign: "center"
