@@ -6,11 +6,26 @@ from kivymd.uix.textfield import MDTextField
 from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.app import MDApp
-
+from kivy.clock import mainthread
 
 class MQTTSettingsWidget(MDCard):
     connection_status = StringProperty("Disconnected")
     local_time = StringProperty("--:--")
+
+    def update_local_time_hd(self, new_time):
+        self.local_time_label.text = f"{new_time}"
+
+    @mainthread
+    def update_status(self, status, color):
+        self.connection_status = status
+        self.status_label.text = status
+        self.status_label.color = (0, 1, 0, 1) if color == "green" else (1, 0, 0, 1)
+
+    def on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            self.update_status("Connected", "green")
+        else:
+            self.update_status("Connection failed", "red")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
