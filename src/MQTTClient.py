@@ -22,7 +22,7 @@ class MQTTClient:
     def requestForAllInfo(self):
         self.client.publish(self.PUB_TOPICS["GET_ALL_INFO"], "")
 
-    def connect(self, broker, port):
+    def connect_to_server(self, broker, port):
         try:
             self.client.connect(broker, port, 60)
             self.client.loop_start()

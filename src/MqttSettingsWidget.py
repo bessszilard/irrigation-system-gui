@@ -12,8 +12,11 @@ class MQTTSettingsWidget(MDCard):
     connection_status = StringProperty("Disconnected")
     local_time = StringProperty("--:--")
 
+    def add_cb(self, connect_to_server):
+        self.connect = connect_to_server
+
     def update_local_time_hd(self, new_time):
-        self.local_time_label.text = f"{new_time}"
+        self.local_time_label.text = f"{new_time['LocalTime']}"
 
     @mainthread
     def update_status(self, status, color):
@@ -59,7 +62,8 @@ class MQTTSettingsWidget(MDCard):
     
     def connect_to_broker(self, instance):
         # Placeholder function to handle MQTT connection
-        print("Connecting to broker...")
+        print(f"Connecting to broker... {self.broker_input.text} {self.port_input.text}")
+        self.connect(self.broker_input.text, int(self.port_input.text))
 
 
 class MqttSettingsApp(MDApp):

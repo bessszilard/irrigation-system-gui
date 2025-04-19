@@ -15,6 +15,7 @@ from kivymd.app import MDApp
 from kivymd.uix.list import OneLineIconListItem, IconLeftWidget
 from kivy.uix.screenmanager import NoTransition
 from kivy.clock import Clock
+from kivymd.uix.scrollview import MDScrollView
 
 from CommandsWdiget import CommandWidget
 from RelayStatesWidget import RelayStatesWidget
@@ -63,9 +64,8 @@ class MainApp(MDApp):
         super().__init__(**kwargs)
         self.mqtt_client = MQTTClient(self.on_connect)
 
-    def on_connect(self, client, userdata, flags, rc):
-        print("on connect")
-
+    def on_connect(self, client, userdata, flags, rc):     
+        self.mqttSettingsWidget.on_connect(client, userdata, flags, rc)
 
     def add_cb(self, topic_key, callback, call_on_main_thread=True):
         if False == call_on_main_thread:
@@ -144,6 +144,7 @@ class MainApp(MDApp):
         # Add screens
         mqtt_screen = MDScreen(name="mqtt")
         self.mqttSettingsWidget = MQTTSettingsWidget()
+        self.mqttSettingsWidget.add_cb(self.mqtt_client.connect_to_server)
         mqtt_screen.add_widget(self.mqttSettingsWidget)
         self.screen_manager.add_widget(mqtt_screen)
 
@@ -153,8 +154,10 @@ class MainApp(MDApp):
         self.screen_manager.add_widget(commands_screen)
 
         relay_screen = MDScreen(name="relay")
+        relay_scroll_view = MDScrollView()
         self.relayStateWidget = RelayStatesWidget(self.toggle_hd)
-        relay_screen.add_widget(self.relayStateWidget)
+        relay_scroll_view.add_widget(self.relayStateWidget)
+        relay_screen.add_widget(relay_scroll_view)
         self.screen_manager.add_widget(relay_screen)
 
         # Add the top app bar
