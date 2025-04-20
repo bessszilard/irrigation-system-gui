@@ -12,6 +12,11 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.textfield import MDTextField
 
+bulk_actions_list = [
+    ("Save", "SAVE_ALL_CMDS"),
+    ("Reset", "RESET_CMDS_TO_DEFAULT"),
+    ("Load", "LOAD_ALL_CMDS"),
+]
 
 class CommandWidget(MDBoxLayout):
 
@@ -25,6 +30,9 @@ class CommandWidget(MDBoxLayout):
         self.menu_buttons = {}
 
         # Add containers for both sections
+        self.bulk_actions_layout = MDBoxLayout(
+            orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(50)
+        )
         self.options_container = MDBoxLayout(
             orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(50)
         )
@@ -39,6 +47,14 @@ class CommandWidget(MDBoxLayout):
         command_list_scroll.add_widget(self.commands_list_container)
         command_list_scroll.size_hint_y = 1
 
+        for label, command in bulk_actions_list:
+            btn = MDRaisedButton(
+                text=label, size_hint=(None, None), size=(dp(100), dp(40))
+            )
+            btn.bind(on_release=lambda instance, cmd=command: self.command_manager(cmd))
+            self.bulk_actions_layout.add_widget(btn)
+
+        self.add_widget(self.bulk_actions_layout)  # placeholder for command selectors
         self.add_widget(self.options_container)  # placeholder for command selectors
         self.add_widget(command_list_scroll)
 
@@ -127,6 +143,18 @@ class CommandWidget(MDBoxLayout):
     def set_menu_value(self, key, value):
         self.menu_buttons[key].text = value
         self.menus[key].dismiss()
+
+    def save_commands(self):
+        if self.command_manager:
+            self.command_manager("SAVE_ALL_CMDS")
+
+    def reset_to_default_commands(self):
+        if self.command_manager:
+            self.command_manager("RESET_CMDS_TO_DEFAULT")
+
+    def load_commands(self):
+        if self.command_manager:
+            self.command_manager("LOAD_CMDS")
 
     def add_command(self, instance):
         selected_values = {key: btn.text for key, btn in self.menu_buttons.items()}

@@ -10,6 +10,9 @@
     "Publish": {
         "ADD_CMD": "sjirs/cmd/add",
         "REMOVE_CMD": "sjirs/cmd/remove",
+        "SAVE_ALL_CMDS": "sjirs/cmd/save_all",
+        "LOAD_ALL_CMDS": "sjirs/cmd/load_all",
+        "RESET_CMDS_TO_DEFAULT": "sjirs/cmd/reset_cmd_to_def",
         "OVERRIDE_CMD": "sjirs/cmd/override",
         "GET_CMD_OPTIONS": "sjirs/cmd/command-options/get",
         "GET_ALL_INFO": "sjirs/get-all-info"
