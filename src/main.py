@@ -1,27 +1,26 @@
+from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.screenmanager import NoTransition
+from kivy.uix.widget import Widget
 from kivymd.app import MDApp
-from kivymd.uix.navigationdrawer import MDNavigationDrawer, MDNavigationLayout
+from kivymd.uix.boxlayout import BoxLayout
+from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
-from kivymd.uix.textfield import MDTextField
-from kivymd.uix.button import MDRaisedButton
-from kivymd.uix.boxlayout import BoxLayout
+from kivymd.uix.list import IconLeftWidget, OneLineIconListItem
+from kivymd.uix.navigationdrawer import MDNavigationDrawer, MDNavigationLayout
+from kivymd.uix.screen import MDScreen
 from kivymd.uix.screenmanager import MDScreenManager
-from kivymd.uix.screen import MDScreen  
-from kivymd.uix.toolbar import MDTopAppBar
-from kivy.uix.widget import Widget
-from kivy.uix.boxlayout import BoxLayout
-from kivymd.app import MDApp
-from kivymd.uix.list import OneLineIconListItem, IconLeftWidget
-from kivy.uix.screenmanager import NoTransition
-from kivy.clock import Clock
 from kivymd.uix.scrollview import MDScrollView
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.toolbar import MDTopAppBar
 
-from CommandsWdiget import CommandWidget
-from RelayStatesWidget import RelayStatesWidget
-from MqttSettingsWidget import MQTTSettingsWidget
-
+from CommandWidget import CommandWidget
 from MQTTClient import MQTTClient
+from MqttSettingsWidget import MQTTSettingsWidget
+from RelayStatesWidget import RelayStatesWidget
+
 
 class MainScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -32,7 +31,7 @@ class MainScreen(MDScreen):
         self.main_layout.add_widget(self.mqttSettingsWidget)
 
         # Add the command widget
-        self.commandWidget = CommandWidget(self.mqtt_client.addCommand)
+        self.commandWidget = CommandWidget(self.mqtt_client.commandManager)
         self.main_layout.add_widget(self.commandWidget)
 
         # Add the relay state widget
@@ -51,7 +50,7 @@ class MainScreen(MDScreen):
     def toggle_hd(self):
         # Logic for toggling relay states
         print("Toggling relay state...")
-    
+
     # @mainthread
     def update_status(self, status, color):
         self.connection_status = status
@@ -78,10 +77,11 @@ class MainApp(MDApp):
 
         sub_top = self.mqtt_client.SUB_TOPICS
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["LOCAL_TIME"]] = self.mqttSettingsWidget.update_local_time_hd
-        self.add_cb("CMD_OPTIONS",  self.commandWidget.rebuild)
+        self.add_cb("CMD_OPTIONS",  self.commandWidget.rebuild_cmd_options)
         # self.add_cb("SENSORS",  self.commandWidget.rebuild)
         self.add_cb("RELAYS", self.relayStateWidget.build_or_update)
-        self.add_cb("CMD_LIST", self.commandWidget.add_command_list, False)
+        self.add_cb("CMD_LIST", self.commandWidget.rebuild_cmd_list, False)
+        self.add_cb("CMD_RESPONSE", lambda payload: print(payload))
         self.mqtt_client.setTopicsCallback(self.mqttTopicCallbacks)
 
     def toggle_hd(self, relay, state):
@@ -91,9 +91,9 @@ class MainApp(MDApp):
         current_command = f"Manua;{relay};{state};{priority};"
         self.mqtt_client.overrideCommand(current_command)
         print(f"Toggle {relay} {state}")
-    
+
     def build(self):
-      # Create the MDNavigationLayout (This handles both the navigation drawer and the screen manager)
+        # Create the MDNavigationLayout (This handles both the navigation drawer and the screen manager)
         nav_layout = MDNavigationLayout()
 
         # Create the MDNavigationDrawer
@@ -149,7 +149,7 @@ class MainApp(MDApp):
         self.screen_manager.add_widget(mqtt_screen)
 
         commands_screen = MDScreen(name="commands")
-        self.commandWidget = CommandWidget(self.mqtt_client.addCommand)
+        self.commandWidget = CommandWidget(self.mqtt_client.commandManager)
         commands_screen.add_widget(self.commandWidget)
         self.screen_manager.add_widget(commands_screen)
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
 # class MQTTApp(MDApp):
 #     connection_status = StringProperty("Not connected")
 #     local_time = StringProperty("Waiting for time...")
-    
+
 #     def __init__(self, **kwargs):
 #         super().__init__(**kwargs)
 #         self.mqtt_client = MQTTClient(self.on_connect)
@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
 #         self.connect_to_broker("")
 #         return main_layout
-    
+
 #     def update_local_time_hd(self, new_time):
 #         self.local_time_label.text = f"{new_time}"
 
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 
 #     def sensors_hd(self, payload):
 #         print("sensors_hd")
-        
+
 #     def relay_state_hd(self, payload):
 #         print("relay_state_hd")
 #         Clock.schedule_once(lambda dt: self.relayStateWidget.build_or_update(payload))
@@ -274,7 +274,7 @@ if __name__ == "__main__":
 #         except ValueError:
 #             self.update_status("Invalid port number", "red")
 #             return
-        
+
 #         if not self.mqtt_client.connect(broker, port):
 #             self.update_status("Connection failed", "red")
 #             return

@@ -1,5 +1,6 @@
-import paho.mqtt.client as mqtt
 import json
+
+import paho.mqtt.client as mqtt
 
 # Define MQTT topics
 
@@ -30,7 +31,7 @@ class MQTTClient:
         except Exception as e:
             print(f"Connection failed: {e}")
             return False
-        
+
     def subscribe(self, topic):
         if topic in self.subscribed_topics:
             return
@@ -43,7 +44,7 @@ class MQTTClient:
             print("Connected successfully to MQTT broker")
             for topic in self.SUB_TOPICS.values():
                 self.subscribe(topic)
-            
+
             self.on_connect_callback(client, userdata, flags, rc)
 
             self.requestForAllInfo()
@@ -57,13 +58,13 @@ class MQTTClient:
         if topic not in self.__callbacks.keys():
             print(f"Topic {topic} not handled")
             return
-        
+
         try:
             parsedPayload = json.loads(payload)
             if not parsedPayload:
                 print(f"Pares payload is none")
             self.__callbacks[topic](parsedPayload)
-       
+
         except json.JSONDecodeError as e:
             # Catch JSON decoding errors specifically
             print(f"JSONDecodeError: Failed to parse payload. Error: {e}")
@@ -71,14 +72,13 @@ class MQTTClient:
         except Exception as e:
             # General exception for any other errors
             print(f"Failed to parse {payload}. Error: {e}")
-# publish
-    def addCommand(self, command):
-        self.client.publish(self.PUB_TOPICS["ADD_CMD"], command)
-        print(f'{self.PUB_TOPICS["ADD_CMD"]} published {command}')
-    
-    def removeCommand(self, command):
-        self.client.publish(self.PUB_TOPICS["REMOVE_CMD"], command)
-        print(f'{self.PUB_TOPICS["REMOVE_CMD"]} published {command}')  
+    # publish
+    def commandManager(self, action_topic, command=""):
+        if action_topic not in self.PUB_TOPICS.keys():
+            print(f"Invalid command action: {self.PUB_TOPICS}")
+            return
+        self.client.publish(self.PUB_TOPICS[action_topic], command)
+        print(f"{self.PUB_TOPICS[action_topic]} published {command}")
 
     def overrideCommand(self, command):
         self.client.publish(self.PUB_TOPICS["OVERRIDE_CMD"], command)
