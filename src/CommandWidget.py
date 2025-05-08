@@ -1,33 +1,40 @@
 import json
+import os
 
 from kivy.clock import mainthread
+from kivy.core.window import Window
 from kivy.metrics import dp
+from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 from kivymd.uix.anchorlayout import MDAnchorLayout
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDIconButton, MDRaisedButton
+from kivymd.uix.filemanager import MDFileManager
 from kivymd.uix.label import MDLabel
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.textfield import MDTextField
 
 bulk_actions_list = [
-    ("Save", "SAVE_ALL_CMDS"),
-    ("Reset", "RESET_CMDS_TO_DEFAULT"),
-    ("Load", "LOAD_ALL_CMDS"),
+    ("Save", "SAVE_ALL_CMDS", True),
+    ("Reset", "RESET_CMDS_TO_DEFAULT", True),
+    ("Load", "LOAD_ALL_CMDS", True),
+    ("Import", "IMPORT", False),
+    ("Export", "EXPORT", False),
 ]
 
 class CommandWidget(MDBoxLayout):
 
-    def __init__(self, command_manager=None, **kwargs):
+    def __init__(self, mqtt_command_manager=None, **kwargs):
         super().__init__(
             orientation="vertical", spacing=dp(10), padding=dp(10), **kwargs
         )
-        self.command_manager = command_manager
+        self.mqtt_command_manager = mqtt_command_manager
         self.command_data = {}
         self.menus = {}
         self.menu_buttons = {}
+        self.command_list_data = None
 
         # Add containers for both sections
         self.bulk_actions_layout = MDBoxLayout(
@@ -47,16 +54,43 @@ class CommandWidget(MDBoxLayout):
         command_list_scroll.add_widget(self.commands_list_container)
         command_list_scroll.size_hint_y = 1
 
-        for label, command in bulk_actions_list:
+        for label, command, use_mqtt in bulk_actions_list:
             btn = MDRaisedButton(
                 text=label, size_hint=(None, None), size=(dp(100), dp(40))
             )
-            btn.bind(on_release=lambda instance, cmd=command: self.command_manager(cmd))
+            if use_mqtt:
+                btn.bind(
+                    on_release=lambda instance, cmd=command: self.mqtt_command_manager(
+                        cmd
+                    )
+                )
+            else:
+                btn.bind(
+                    on_release=lambda instance, cmd=command: self.file_cmd_manager(cmd)
+                )
+
             self.bulk_actions_layout.add_widget(btn)
 
         self.add_widget(self.bulk_actions_layout)  # placeholder for command selectors
         self.add_widget(self.options_container)  # placeholder for command selectors
         self.add_widget(command_list_scroll)
+
+        self.manager_open = False
+        self.file_manager = MDFileManager(
+            select_path=self.load_json,
+            exit_manager=self.close_file_manager,
+            preview=True,
+            search='all'  # allow files
+        )
+        self.file_manager.ext = [".json"]
+
+    def file_cmd_manager(self, cmd):
+        if cmd == "IMPORT":
+            self.open_file_manager()
+            pass
+        elif cmd == "EXPORT":
+            self.export_json()
+            pass
 
     @mainthread
     def rebuild_cmd_options(self, command_options_data):
@@ -115,6 +149,8 @@ class CommandWidget(MDBoxLayout):
         if not command_list_data or "cmdList" not in command_list_data:
             return
 
+        self.command_list_data = command_list_data
+
         for cmd in command_list_data["cmdList"]:
             row = MDBoxLayout(
                 orientation="horizontal",
@@ -172,6 +208,55 @@ class CommandWidget(MDBoxLayout):
         print(f"Removing command: {cmd}")
         if self.command_manager:
             self.command_manager("REMOVE_CMD", cmd)
+
+    def open_file_manager(self, *args):
+        self.file_manager.show(os.path.expanduser("~"))  # or any folder
+        self.manager_open = True
+
+    def close_file_manager(self, *args):
+        self.file_manager.close()
+        self.manager_open = False
+
+    def load_json(self, path):
+        self.close_file_manager()
+        if not path.lower().endswith(".json"):
+            self.label.text = "Please select a JSON file"
+            print("Invalid file selected:", path)
+            return
+        try:
+            with open(path, "r") as f:
+                data = json.load(f)
+                self.label.text = f"Loaded: {os.path.basename(path)}"
+                print("Imported JSON content:", data)
+        except Exception as e:
+            self.label.text = "Failed to load file"
+            print("Error:", e)
+
+    def export_json(self, *args):
+        self.file_manager = MDFileManager(
+            select_path=self.save_json_to_folder,
+            exit_manager=self.close_file_manager,
+            preview=False,
+            search="dirs",  # ⬅ only allow selecting folders
+        )
+        self.file_manager.show(os.path.expanduser("~"))
+        self.manager_open = True
+
+    def save_json_to_folder(self, folder_path):
+        self.close_file_manager()
+
+        if self.command_list_data is None:
+            print("Command list is empty")
+            return
+
+        export_path = os.path.join(folder_path, "exported_file.json")
+
+        try:
+            with open(export_path, "w") as f:
+                json.dump(self.command_list_data, f, indent=4)
+            print("Data exported to:", export_path)
+        except Exception as e:
+            print("Export error:", e)
 
 
 # Sample JSON data
