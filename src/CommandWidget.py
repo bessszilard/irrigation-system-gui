@@ -20,8 +20,8 @@ bulk_actions_list = [
     ("Save", "SAVE_ALL_CMDS", True),
     ("Reset", "RESET_CMDS_TO_DEFAULT", True),
     ("Load", "LOAD_ALL_CMDS", True),
-    ("Import", "IMPORT", False),
-    ("Export", "EXPORT", False),
+    ("Import", "IMPORT_FROM_FILE", False),
+    ("Export", "EXPORT_CMD", False),
 ]
 
 class CommandWidget(MDBoxLayout):
@@ -54,19 +54,21 @@ class CommandWidget(MDBoxLayout):
         command_list_scroll.add_widget(self.commands_list_container)
         command_list_scroll.size_hint_y = 1
 
-        for label, command, use_mqtt in bulk_actions_list:
+        for label, action, use_mqtt in bulk_actions_list:
             btn = MDRaisedButton(
                 text=label, size_hint=(None, None), size=(dp(100), dp(40))
             )
             if use_mqtt:
                 btn.bind(
-                    on_release=lambda instance, cmd=command: self.mqtt_command_manager(
-                        cmd
+                    on_release=lambda instance, action=action: self.mqtt_command_manager(
+                        action
                     )
                 )
             else:
                 btn.bind(
-                    on_release=lambda instance, cmd=command: self.file_cmd_manager(cmd)
+                    on_release=lambda instance, action=action: self.file_cmd_manager(
+                        action
+                    )
                 )
 
             self.bulk_actions_layout.add_widget(btn)
@@ -84,11 +86,11 @@ class CommandWidget(MDBoxLayout):
         )
         self.file_manager.ext = [".json"]
 
-    def file_cmd_manager(self, cmd):
-        if cmd == "IMPORT":
-            self.open_file_manager()
+    def file_cmd_manager(self, action):
+        if action == "IMPORT_FROM_FILE":
+            data = self.open_file_manager()
             pass
-        elif cmd == "EXPORT":
+        elif action == "EXPORT_TO_FILE":
             self.export_json()
             pass
 
@@ -220,17 +222,24 @@ class CommandWidget(MDBoxLayout):
     def load_json(self, path):
         self.close_file_manager()
         if not path.lower().endswith(".json"):
-            self.label.text = "Please select a JSON file"
             print("Invalid file selected:", path)
             return
         try:
             with open(path, "r") as f:
                 data = json.load(f)
-                self.label.text = f"Loaded: {os.path.basename(path)}"
-                print("Imported JSON content:", data)
+                print(f"Imported JSON content: {os.path.basename(path)} {data}")
         except Exception as e:
-            self.label.text = "Failed to load file"
             print("Error:", e)
+
+        if "cmdList" not in data:
+            print("missing cmdList element")
+            return
+
+        cmd_list_compressed = ""
+        for cmd in data["cmdList"]:
+            cmd_list_compressed += cmd + "\n"
+
+        print(f"Compressed cmd list: {cmd_list_compressed}")
 
     def export_json(self, *args):
         self.file_manager = MDFileManager(

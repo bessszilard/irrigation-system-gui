@@ -12,6 +12,7 @@
         "REMOVE_CMD": "sjirs/cmd/remove",
         "SAVE_ALL_CMDS": "sjirs/cmd/save_all",
         "LOAD_ALL_CMDS": "sjirs/cmd/load_all",
+        "IMPORT_FROM_FILE": "sjirs/cmd/import_from_file",
         "RESET_CMDS_TO_DEFAULT": "sjirs/cmd/reset_cmd_to_def",
         "OVERRIDE_CMD": "sjirs/cmd/override",
         "GET_CMD_OPTIONS": "sjirs/cmd/command-options/get",
