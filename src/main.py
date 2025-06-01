@@ -20,6 +20,7 @@ from CommandWidget import CommandWidget
 from MQTTClient import MQTTClient
 from MqttSettingsWidget import MQTTSettingsWidget
 from RelayStatesWidget import RelayStatesWidget
+from SensorWidget import SensorWidget
 
 
 class MainScreen(MDScreen):
@@ -77,11 +78,11 @@ class MainApp(MDApp):
 
         sub_top = self.mqtt_client.SUB_TOPICS
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS["LOCAL_TIME"]] = self.mqttSettingsWidget.update_local_time_hd
-        self.add_cb("CMD_OPTIONS",  self.commandWidget.rebuild_cmd_options)
-        # self.add_cb("SENSORS",  self.commandWidget.rebuild)
+        self.add_cb("CMD_OPTIONS", self.commandWidget.rebuild_cmd_options)
         self.add_cb("RELAYS", self.relayStateWidget.build_or_update)
         self.add_cb("CMD_LIST", self.commandWidget.rebuild_cmd_list, False)
         self.add_cb("CMD_RESPONSE", lambda payload: print(payload))
+        self.add_cb("SENSORS", self.sensorsStateWidget.update_data)
         self.mqtt_client.setTopicsCallback(self.mqttTopicCallbacks)
 
     def toggle_hd(self, relay, state):
@@ -134,6 +135,11 @@ class MainApp(MDApp):
         button3.bind(on_release=self.on_relay_button_click)
         drawer_list.add_widget(button3)
 
+        button4 = OneLineIconListItem(text="Sensors")
+        button4.add_widget(IconLeftWidget(icon="thermometer"))
+        button4.bind(on_release=self.on_sensor_button_click)
+        drawer_list.add_widget(button4)
+
         # Add the drawer content (list of buttons)
         nav_drawer.add_widget(drawer_content)
         drawer_content.add_widget(drawer_list)
@@ -160,6 +166,13 @@ class MainApp(MDApp):
         relay_screen.add_widget(relay_scroll_view)
         self.screen_manager.add_widget(relay_screen)
 
+        sensors_screen = MDScreen(name="sensors")
+        sensors_scroll_view = MDScrollView()
+        self.sensorsStateWidget = SensorWidget()
+        sensors_scroll_view.add_widget(self.sensorsStateWidget)
+        sensors_screen.add_widget(sensors_scroll_view)
+        self.screen_manager.add_widget(sensors_screen)
+
         # Add the top app bar
         top_app_bar = MDTopAppBar(
             title="Irrigation System",
@@ -185,6 +198,10 @@ class MainApp(MDApp):
 
     def on_relay_button_click(self, instance):
         self.screen_manager.current = "relay"
+
+    def on_sensor_button_click(self, instance):
+        self.screen_manager.current = "sensors"
+
 
 if __name__ == "__main__":
     MainApp().run()
