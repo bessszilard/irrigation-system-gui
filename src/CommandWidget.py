@@ -24,6 +24,9 @@ bulk_actions_list = [
     ("Export", "EXPORT", False),
 ]
 
+START_CHAR = "startChar"
+END_CHAR = "endChar"
+
 class CommandWidget(MDBoxLayout):
 
     def __init__(self, mqtt_command_manager=None, **kwargs):
@@ -104,6 +107,8 @@ class CommandWidget(MDBoxLayout):
         self.options_container.add_widget(label)
 
         for key, values in self.command_options_data.items():
+            if key in [START_CHAR, END_CHAR]:
+                continue
             button = MDRaisedButton(
                 text=values[0], size_hint=(None, None), size=(dp(100), dp(40))
             )
@@ -181,33 +186,34 @@ class CommandWidget(MDBoxLayout):
         self.menus[key].dismiss()
 
     def save_commands(self):
-        if self.command_manager:
-            self.command_manager("SAVE_ALL_CMDS")
+        if self.mqtt_command_manager:
+            self.mqtt_command_manager("SAVE_ALL_CMDS")
 
     def reset_to_default_commands(self):
-        if self.command_manager:
-            self.command_manager("RESET_CMDS_TO_DEFAULT")
+        if self.mqtt_command_manager:
+            self.mqtt_command_manager("RESET_CMDS_TO_DEFAULT")
 
     def load_commands(self):
-        if self.command_manager:
-            self.command_manager("LOAD_CMDS")
+        if self.mqtt_command_manager:
+            self.mqtt_command_manager("LOAD_CMDS")
 
     def add_command(self, instance):
         selected_values = {key: btn.text for key, btn in self.menu_buttons.items()}
         selected_values['description'] = self.text_input.text
         print("Selected Command:", selected_values)
 
-        cmd = ""
-        for value in selected_values.values():
-            cmd += f"{value};"
+        cmd = self.command_options_data[START_CHAR]
+        cmd += ";".join(selected_values.values())
+        cmd += self.command_options_data[END_CHAR]
         print("Sent Command: ", cmd)
-        if self.command_manager:
-            self.command_manager("ADD_CMD", cmd)
+
+        if self.mqtt_command_manager:
+            self.mqtt_command_manager("ADD_CMD", cmd)
 
     def remove_command(self, cmd):
         print(f"Removing command: {cmd}")
-        if self.command_manager:
-            self.command_manager("REMOVE_CMD", cmd)
+        if self.mqtt_command_manager:
+            self.mqtt_command_manager("REMOVE_CMD", cmd)
 
     def open_file_manager(self, *args):
         self.file_manager.show(os.path.expanduser("~"))  # or any folder
