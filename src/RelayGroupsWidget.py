@@ -10,6 +10,8 @@ from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.textfield import MDTextField
 
+NO_GROUP_SELECTED = "Select Group"
+
 KV = """
 <RelayGroupsWidget>:
     orientation: 'vertical'
@@ -66,9 +68,10 @@ class RelayGroupsWidget(MDBoxLayout):
 
                 # Dropdown setup
                 # Create dropdown button
+                # TODOsz update color
                 dropdown_button = MDFlatButton(
-                    text=f"Group {group_val}" if group_val else "Select Group",
-                    size_hint_x=0.7
+                    text=f"Group {group_val}" if group_val else NO_GROUP_SELECTED,
+                    size_hint_x=0.7,
                 )
 
                 # Dropdown menu setup
@@ -94,7 +97,9 @@ class RelayGroupsWidget(MDBoxLayout):
             else:
                 # Update existing dropdown text
                 label, dropdown_button, _ = self.relay_widgets[relay_key]
-                dropdown_button.text = f"Group {group_val}" if group_val else "Select Group"
+                dropdown_button.text = (
+                    f"Group {group_val}" if group_val else NO_GROUP_SELECTED
+                )
 
     def open_menu(self, caller_button, menu):
         menu.caller = caller_button
@@ -109,11 +114,23 @@ class RelayGroupsWidget(MDBoxLayout):
 
     def on_set(self):
         print("Set clicked")
+        set_group_str = ""
+        for relay_key in self.relay_widgets:
+            _, dropdown_button, _ = self.relay_widgets[relay_key]
+            if dropdown_button.text != NO_GROUP_SELECTED:
+                group_text = dropdown_button.text.replace("Group ", "")
+                print(f"{relay_key} -> {group_text}")
+                set_group_str += f"RG{group_text}:{relay_key};"
+        print(set_group_str)
 
     def on_reload(self):
         print("Reload clicked")
 
     def on_reset(self):
+        for relay_key in self.relay_widgets:
+            _, dropdown_button, _ = self.relay_widgets[relay_key]
+            dropdown_button.text = NO_GROUP_SELECTED
+
         print("Reset to Default clicked")
 
 
