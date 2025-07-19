@@ -2,6 +2,7 @@
     "Subscribe": {
         "SENSORS": "sjirs/sensors",
         "RELAYS": "sjirs/relays",
+        "RELAY_GROUPS": "sjirs/relay-groups/info",
         "LOCAL_TIME": "sjirs/localTime",
         "CMD_LIST": "sjirs/cmd/list",
         "CMD_RESPONSE": "sjirs/cmd/response",
@@ -16,6 +17,7 @@
         "RESET_CMDS_TO_DEFAULT": "sjirs/cmd/reset_cmd_to_def",
         "OVERRIDE_CMD": "sjirs/cmd/override",
         "GET_CMD_OPTIONS": "sjirs/cmd/command-options/get",
+        "RELAY_GROUPS_SET": "sjirs/relay-groups/set",
         "GET_ALL_INFO": "sjirs/get-all-info"
     }
 }

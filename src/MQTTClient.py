@@ -83,3 +83,7 @@ class MQTTClient:
     def overrideCommand(self, command):
         self.client.publish(self.PUB_TOPICS["OVERRIDE_CMD"], command)
         print(f'{self.PUB_TOPICS["OVERRIDE_CMD"]} published {command}')
+
+    def set_relay_groups(self, command):
+        self.client.publish(self.PUB_TOPICS["RELAY_GROUPS_SET"], command)
+        print(f'{self.PUB_TOPICS["RELAY_GROUPS_SET"]} published {command}')

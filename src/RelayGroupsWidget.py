@@ -14,7 +14,7 @@ class RelayGroupsWidget(MDBoxLayout):
     relay_widgets = ObjectProperty({})
     group_options = []
 
-    def __init__(self, **kwargs):
+    def __init__(self, mqtt_set_relay_groups=None, **kwargs):
         super().__init__(orientation="vertical", spacing=10, padding=10, **kwargs)
         self.relay_widgets = {}
 
@@ -43,6 +43,8 @@ class RelayGroupsWidget(MDBoxLayout):
 
         self.scroll.add_widget(self.container)
         self.add_widget(self.scroll)
+
+        self.__mqtt_set_relay_groups = mqtt_set_relay_groups
 
     def build_or_update(self, json_data):
         groups = json_data["RelayGroups"]
@@ -109,7 +111,8 @@ class RelayGroupsWidget(MDBoxLayout):
                 group_text = dropdown_button.text.replace("Group ", "")
                 print(f"{relay_key} -> {group_text}")
                 set_group_str += f"RG{group_text}:{relay_key};"
-        print(set_group_str)
+        if self.__mqtt_set_relay_groups:
+            self.__mqtt_set_relay_groups(set_group_str)
 
     def on_reload(self):
         print("Reload clicked")
@@ -119,7 +122,9 @@ class RelayGroupsWidget(MDBoxLayout):
             _, dropdown_button, _ = self.relay_widgets[relay_key]
             dropdown_button.text = NO_GROUP_SELECTED
 
-        print("Reset to Default clicked")
+        print("Remove all groups")
+        if self.__mqtt_set_relay_groups:
+            self.__mqtt_set_relay_groups("")
 
 
 class TestApp(MDApp):
