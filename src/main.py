@@ -140,7 +140,7 @@ class MainApp(MDApp):
 
         relay_groups_sc = MDScreen(name="relay_groups")
         relay_groups_scroll_view = MDScrollView()
-        self.relayGroupsWidget = RelayGroupsWidget(self.mqtt_client.set_relay_groups)
+        self.relayGroupsWidget = RelayGroupsWidget(self.mqtt_client.commandManager)
         relay_groups_scroll_view.add_widget(self.relayGroupsWidget)
         relay_groups_sc.add_widget(relay_groups_scroll_view)
         self.screen_manager.add_widget(relay_groups_sc)
