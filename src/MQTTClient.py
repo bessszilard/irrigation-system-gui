@@ -1,4 +1,5 @@
 import json
+import time
 
 import paho.mqtt.client as mqtt
 
@@ -47,6 +48,8 @@ class MQTTClient:
 
             self.on_connect_callback(client, userdata, flags, rc)
 
+            time.sleep(0.5)
+
             self.requestForAllInfo()
         else:
             print(f"Connection failed with code {rc}")
@@ -81,6 +84,5 @@ class MQTTClient:
         print(f"{self.PUB_TOPICS[action_topic]} published {command}")
 
     def overrideCommand(self, command):
-        self.client.publish(self.PUB_TOPICS["OVERRIDE_CMD"], command)
-        print(f'{self.PUB_TOPICS["OVERRIDE_CMD"]} published {command}')
-
+        self.client.publish(self.PUB_TOPICS["CMD_OVERRIDE"], command)
+        print(f'{self.PUB_TOPICS["CMD_OVERRIDE"]} published {command}')

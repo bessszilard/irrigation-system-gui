@@ -17,11 +17,11 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.textfield import MDTextField
 
 bulk_actions_list = [
-    ("Save", "SAVE_ALL_CMDS", True),
-    ("Reset", "RESET_CMDS_TO_DEFAULT", True),
-    ("Load", "LOAD_ALL_CMDS", True),
+    ("Save", "CMDS_SAVE_ALL", True),
+    ("Reset", "CMDS_RESET_TO_DEFAULT", True),
+    ("Load", "CMDS_LOAD_ALL", True),
     ("Import", "IMPORT_FROM_FILE", False),
-    ("Export", "EXPORT_CMD", False),
+    ("Export", "EXPORT_TO_FILE", False),
 ]
 
 START_CHAR = "startChar"
@@ -84,10 +84,9 @@ class CommandWidget(MDBoxLayout):
         self.file_manager = MDFileManager(
             select_path=self.load_json,
             exit_manager=self.close_file_manager,
-            preview=True,
-            search='all'  # allow files
+            search="all",  # allow files
+            ext=[".json", ".JSON"],
         )
-        self.file_manager.ext = [".json"]
 
     def file_cmd_manager(self, action):
         if action == "IMPORT_FROM_FILE":
@@ -189,11 +188,11 @@ class CommandWidget(MDBoxLayout):
 
     def save_commands(self):
         if self.mqtt_command_manager:
-            self.mqtt_command_manager("SAVE_ALL_CMDS")
+            self.mqtt_command_manager("CMDS_SAVE_ALL")
 
     def reset_to_default_commands(self):
         if self.mqtt_command_manager:
-            self.mqtt_command_manager("RESET_CMDS_TO_DEFAULT")
+            self.mqtt_command_manager("CMDS_RESET_TO_DEFAULT")
 
     def load_commands(self):
         if self.mqtt_command_manager:
@@ -210,12 +209,12 @@ class CommandWidget(MDBoxLayout):
         print("Sent Command: ", cmd)
 
         if self.mqtt_command_manager:
-            self.mqtt_command_manager("ADD_CMD", cmd)
+            self.mqtt_command_manager("CMD_ADD", cmd)
 
     def remove_command(self, cmd):
         print(f"Removing command: {cmd}")
         if self.mqtt_command_manager:
-            self.mqtt_command_manager("REMOVE_CMD", cmd)
+            self.mqtt_command_manager("CMD_REMOVE", cmd)
 
     def open_file_manager(self, *args):
         self.file_manager.show(os.path.expanduser("~"))  # or any folder
@@ -243,9 +242,11 @@ class CommandWidget(MDBoxLayout):
 
         cmd_list_compressed = ""
         for cmd in data["cmdList"]:
-            cmd_list_compressed += cmd + "\n"
+            cmd_list_compressed += cmd + "_"
 
         print(f"Compressed cmd list: {cmd_list_compressed}")
+        if self.mqtt_command_manager:
+            self.mqtt_command_manager("CMDS_IMPORT_FROM_FILE", cmd_list_compressed)
 
     def export_json(self, *args):
         self.file_manager = MDFileManager(
