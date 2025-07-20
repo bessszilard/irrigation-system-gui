@@ -50,7 +50,8 @@ class RelayGroupsWidget(MDBoxLayout):
         groups = json_data["RelayGroups"]
         relays = json_data["Relays"]
 
-        self.group_options = [f"Group {g}" for g in groups]
+        self.group_options = [NO_GROUP_SELECTED]
+        self.group_options += [f"{g}" for g in groups]
 
         for relay_key, group_val in relays.items():
             if relay_key not in self.relay_widgets:
@@ -110,7 +111,7 @@ class RelayGroupsWidget(MDBoxLayout):
             if dropdown_button.text != NO_GROUP_SELECTED:
                 group_text = dropdown_button.text.replace("Group ", "")
                 print(f"{relay_key} -> {group_text}")
-                set_group_str += f"RG{group_text}:{relay_key};"
+                set_group_str += f"{group_text}:{relay_key};"
         if self.__mqtt_cmd_manager:
             self.__mqtt_cmd_manager("RELAY_GROUPS_SET", set_group_str)
 
