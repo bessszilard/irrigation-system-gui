@@ -6,6 +6,7 @@ import paho.mqtt.client as mqtt
 # Define MQTT topics
 
 MQTT_TOPICS_JSON_PATH = "../config/MqttTopics.json"
+MQTT_ROOT = "rai"
 class MQTTClient:
     def __init__(self, on_connect_callback):
         self.client = mqtt.Client()
@@ -13,10 +14,6 @@ class MQTTClient:
         self.client.on_message = self.on_message
         self.on_connect_callback = on_connect_callback
         self.subscribed_topics = set()
-        with open(MQTT_TOPICS_JSON_PATH) as f:
-            data = json.load(f)
-            self.SUB_TOPICS = data["Subscribe"]
-            self.PUB_TOPICS = data["Publish"]
 
     def setTopicsCallback(self, callback):
         self.__callbacks = callback
@@ -24,10 +21,24 @@ class MQTTClient:
     def requestForAllInfo(self):
         self.client.publish(self.PUB_TOPICS["GET_ALL_INFO"], "")
 
-    def connect_to_server(self, broker, port):
+    def connect_to_server(self, broker, port, device_id):
         try:
             self.client.connect(broker, port, 60)
             self.client.loop_start()
+
+            with open(MQTT_TOPICS_JSON_PATH) as f:
+                data = json.load(f)
+                self.SUB_TOPICS = {}
+                # print(f'data["Subscribe"].items: {data["Subscribe"].items:}')
+                for key, topic in data["Subscribe"].items():
+                    print(f"{key} -> {MQTT_ROOT}/device_id/{topic}")
+                    self.SUB_TOPICS[key] = f"{MQTT_ROOT}/{device_id}/{topic}"
+
+                self.PUB_TOPICS = {}
+                for key, topic in data["Publish"].items():
+                    print(f"{key} -> {MQTT_ROOT}/device_id/{topic}")
+                    self.PUB_TOPICS[key] = f"{MQTT_ROOT}/{device_id}/{topic}"
+
             return True
         except Exception as e:
             print(f"Connection failed: {e}")

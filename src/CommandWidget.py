@@ -242,7 +242,7 @@ class CommandWidget(MDBoxLayout):
 
         cmd_list_compressed = ""
         for cmd in data["cmdList"]:
-            cmd_list_compressed += cmd + "_"
+            cmd_list_compressed += cmd + "|"
 
         print(f"Compressed cmd list: {cmd_list_compressed}")
         if self.mqtt_command_manager:

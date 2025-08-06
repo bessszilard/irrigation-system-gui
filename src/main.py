@@ -38,7 +38,7 @@ class MainApp(MDApp):
             return
         self.mqttTopicCallbacks[self.mqtt_client.SUB_TOPICS[topic_key]] = lambda payload: Clock.schedule_once(lambda dt: callback(payload))
 
-    def set_callbacks(self):
+    def set_mqtt_callbacks(self):
         self.mqttTopicCallbacks = {}
 
         sub_top = self.mqtt_client.SUB_TOPICS
@@ -122,7 +122,9 @@ class MainApp(MDApp):
         # Add screens
         mqtt_screen = MDScreen(name="mqtt")
         self.mqttSettingsWidget = MQTTSettingsWidget()
-        self.mqttSettingsWidget.add_cb(self.mqtt_client.connect_to_server)
+        self.mqttSettingsWidget.add_cb(
+            self.mqtt_client.connect_to_server, self.set_mqtt_callbacks
+        )
         mqtt_screen.add_widget(self.mqttSettingsWidget)
         self.screen_manager.add_widget(mqtt_screen)
 
@@ -164,8 +166,6 @@ class MainApp(MDApp):
         layout.add_widget(nav_layout)
         nav_layout.add_widget(self.screen_manager)
         nav_layout.add_widget(nav_drawer)
-
-        self.set_callbacks()
 
         return layout
 
