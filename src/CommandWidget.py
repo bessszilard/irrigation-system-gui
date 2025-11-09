@@ -90,6 +90,7 @@ class CommandWidget(MDBoxLayout):
 
     def file_cmd_manager(self, action):
         if action == "IMPORT_FROM_FILE":
+            print("IMPORT FOM FILE")
             data = self.open_file_manager()
             pass
         elif action == "EXPORT_TO_FILE":
