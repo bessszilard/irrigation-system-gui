@@ -1,5 +1,6 @@
 import json
 
+from kivy.clock import Clock
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDRaisedButton
@@ -67,7 +68,7 @@ class RelayStatesWidget(MDGridLayout):
             self.__buttons[f"{relay}_toggle"].disabled = state
         print(f"Auto mode for {relay}: {'Enabled' if state else 'Disabled'}")
         if self.__toggle_handler:
-            self.__toggle_handler(relay, state, true)
+            self.__toggle_handler(relay, state)
 
     def build_or_update(self, relay_data):
         if not self.__built_already:
@@ -91,7 +92,8 @@ class RelayStatesWidget(MDGridLayout):
             self.__buttons[f"{relay}_toggle"] = MDRaisedButton(text="Toggle all")
             self.__buttons[f"{relay}_toggle"].bind(on_press=lambda instance, r=relay: self.toggle(r))
             self.add_widget(self.__buttons[f"{relay}_toggle"])
-            self.add_widget(AutoCheckbox(relay, self.auto_mode_changed))
+            auto_check_box = AutoCheckbox(relay, self.auto_mode_changed)
+            self.add_widget(auto_check_box)
             self.__built_already = True
 
         for relay, attributes in relay_data.items():

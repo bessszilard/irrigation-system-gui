@@ -8,6 +8,12 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.textfield import MDTextField
 
+DEFAULT_SERVER = "test.mosquitto.org"
+DEFAULT_PORT_STR = "1883"
+DEFAULT_DEVICE_ID = "jdm7"
+# DEFAULT_DEVICE_ID = "th2w"
+# DEFAULT_DEVICE_ID = "10a0"
+
 
 class MQTTSettingsWidget(MDCard):
     connection_status = StringProperty("Disconnected")
@@ -43,15 +49,15 @@ class MQTTSettingsWidget(MDCard):
         mqtt_layout = GridLayout(cols=2, spacing=5)
 
         mqtt_layout.add_widget(MDLabel(text="MQTT Server:", size_hint_y=None, height=30))
-        self.broker_input = MDTextField(text="test.mosquitto.org")
+        self.broker_input = MDTextField(text=DEFAULT_SERVER)
         mqtt_layout.add_widget(self.broker_input)
 
         mqtt_layout.add_widget(MDLabel(text="Port:", size_hint_y=None, height=30))
-        self.port_input = MDTextField(text="1883")
+        self.port_input = MDTextField(text=DEFAULT_PORT_STR)
         mqtt_layout.add_widget(self.port_input)
 
         mqtt_layout.add_widget(MDLabel(text="Device Id:", size_hint_y=None, height=30))
-        self.device_id_input = MDTextField(text="jdm7")
+        self.device_id_input = MDTextField(text=DEFAULT_DEVICE_ID)
         mqtt_layout.add_widget(self.device_id_input)
 
         mqtt_layout.add_widget(MDLabel(text="Status:", size_hint_y=None, height=30))

@@ -55,7 +55,7 @@ class MainApp(MDApp):
         # remove old command if exists
         priority = "PTX" if relay == "RXX" else "PTO"
 
-        current_command = f"%Manua;{priority};{relay};{state}#"
+        current_command = f"$Manual;{priority};{relay};{state}#"
         self.mqtt_client.overrideCommand(current_command)
         print(f"Toggle {relay} {state}")
 
