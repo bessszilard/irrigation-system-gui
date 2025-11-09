@@ -1,21 +1,24 @@
 {
     "Subscribe": {
-        "SENSORS": "sjirs/sensors",
-        "RELAYS": "sjirs/relays",
-        "LOCAL_TIME": "sjirs/localTime",
-        "CMD_LIST": "sjirs/cmd/list",
-        "CMD_RESPONSE": "sjirs/cmd/response",
-        "CMD_OPTIONS": "sjirs/cmd/command-options"
+        "SENSORS": "sensors",
+        "RELAYS": "relays",
+        "RELAY_GROUPS": "relay-groups/info",
+        "LOCAL_TIME": "localTime",
+        "CMD_LIST": "cmd/list",
+        "CMD_RESPONSE": "cmd/response",
+        "CMD_OPTIONS": "cmd/command-options"
     },
     "Publish": {
-        "ADD_CMD": "sjirs/cmd/add",
-        "REMOVE_CMD": "sjirs/cmd/remove",
-        "SAVE_ALL_CMDS": "sjirs/cmd/save_all",
-        "LOAD_ALL_CMDS": "sjirs/cmd/load_all",
-        "IMPORT_FROM_FILE": "sjirs/cmd/import_from_file",
-        "RESET_CMDS_TO_DEFAULT": "sjirs/cmd/reset_cmd_to_def",
-        "OVERRIDE_CMD": "sjirs/cmd/override",
-        "GET_CMD_OPTIONS": "sjirs/cmd/command-options/get",
-        "GET_ALL_INFO": "sjirs/get-all-info"
+        "CMD_ADD": "cmd/add",
+        "CMD_REMOVE": "cmd/remove",
+        "CMDS_SAVE_ALL": "cmd/save_all",
+        "CMDS_LOAD_ALL": "cmd/load_all",
+        "CMDS_IMPORT_FROM_FILE": "cmd/import",
+        "CMDS_RESET_TO_DEFAULT": "cmd/reset_cmd_to_def",
+        "CMD_OVERRIDE": "cmd/override",
+        "CMD_GET_OPTIONS": "cmd/command-options/get",
+        "RELAY_GROUPS_SET": "relay-groups/set",
+        "RELAY_GROUPS_LOAD": "relay-groups/load",
+        "GET_ALL_INFO": "get-all-info"
     }
 }
