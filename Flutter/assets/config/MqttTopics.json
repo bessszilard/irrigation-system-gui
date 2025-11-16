@@ -1,0 +1,29 @@
+{
+    "Subscribe": {
+        "SENSORS": "sensors",
+        "RELAYS": "relays",
+        "RELAY_GROUPS": "relay-groups/info",
+        "LOCAL_TIME": "localTime",
+        "CMD_LIST": "cmd/list",
+        "CMD_RESPONSE": "cmd/response",
+        "CMD_OPTIONS": "cmd/command-options"
+    },
+    "Publish": {
+        "CMD_ADD": "cmd/add",
+        "CMD_REMOVE": "cmd/remove",
+        "CMDS_SAVE_ALL": "cmd/save_all",
+        "CMDS_LOAD_ALL": "cmd/load_all",
+        "CMDS_IMPORT_FROM_FILE": "cmd/import",
+        "CMDS_RESET_TO_DEFAULT": "cmd/reset_cmd_to_def",
+        "CMD_OVERRIDE": "cmd/override",
+        "CMD_GET_OPTIONS": "cmd/command-options/get",
+        "RELAY_GROUPS_SET": "relay-groups/set",
+        "RELAY_GROUPS_LOAD": "relay-groups/load",
+        "GET_ALL_INFO": "get-all-info"
+    }
+}
+
+
+
+
+
